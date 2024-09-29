@@ -1,12 +1,14 @@
-import { useAppSelector } from '@/app/hooks'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { Link } from 'react-router-dom'
-import { selectAllPosts } from '@/features/posts/postsSlice'
+import { fetchPosts, selectAllPosts, selectPostsStatus } from '@/features/posts/postsSlice'
 import { PostAuthor } from '@/features/posts/PostAuthor'
 import { ReactionButtons } from '@/features/posts/ReactionButtons'
+import { useEffect } from 'react'
 
 export const PostsList = () => {
-  // Select the `state.posts` value from the store into the component
+  const dispatch = useAppDispatch()
   const posts = useAppSelector(selectAllPosts)
+  const postStatus = useAppSelector(selectPostsStatus)
 
   const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
 
@@ -20,6 +22,12 @@ export const PostsList = () => {
       <ReactionButtons post={post}/>
     </article>
   ))
+
+  useEffect(() => {
+    if (postStatus === 'idle') {
+      dispatch(fetchPosts())
+    }
+  }, [postStatus, dispatch])
 
   return (
     <section className="posts-list">
